@@ -76,18 +76,23 @@ def notify(contract_address,can_flip_items):
     data = res.json()
 
 if __name__ == '__main__':
-    contract_address = '0x90cfce78f5ed32f9490fd265d16c77a8b5320bd4'
+    contract_address = '0xdf3407636bbf3a015a8e48a079ef7ba49e687fd3'
 
     now_time = datetime.utcnow()
     now_time = now_time.strftime("%Y-%m-%dT%H:%M:%S")
-
+    print("start get all order")
     soldOrders = utility.getCollectionSoldOrders(contract_address)
+    print("end get all order")
     # soldOrders = [('683', 12.2), ('10', 12.4), ('434', 11.0), ('37', 12.89), ('766', 12.9), ('747', 13.5), ('238', 13.5), ('10', 13.8), ('206', 14.5), ('595', 14.6), ('64', 16.4), ('595', 17.0), ('763', 17.5), ('595', 18.5), ('524', 19.99), ('37', 21.99), ('692', 22.0), ('448', 22.0), ('289', 22.0), ('508', 22.22), ('595', 22.5), ('524', 22.5), ('37', 22.5), ('201', 22.5), ('629', 23.0), ('397', 23.0), ('524', 23.5), ('37', 23.5), ('720', 25.0), ('559', 25.0), ('723', 25.2), ('532', 25.99), ('598', 26.0), ('720', 26.5), ('663', 27.0), ('683', 27.5), ('765', 30.0), ('595', 30.0), ('440', 30.0), ('115', 30.0), ('64', 30.9), ('486', 38.0), ('130', 42.69), ('454', 49.0), ('581', 49.9), ('541', 69.042), ('301', 88.0), ('191', 88.88), ('403', 99.0), ('689', 100.0), ('355', 100.0), ('152', 100.0), ('734', 734.0), ('268', 900.0), ('9', 9999.0)]
     
     while True:
+        print("start remove cancel")
         soldOrders = soldOrdersRemoveCancel(contract_address,soldOrders,now_time)
+        print("end remove cancel")
+        print("start created")
         soldOrders = soldOrdersCreated(contract_address,soldOrders,now_time)
-    
+        print("end created")
+
         can_flip_items = canFlipItem(soldOrders)
 
         if can_flip_items:

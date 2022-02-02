@@ -13,6 +13,7 @@ load_dotenv()
 
 def getAssets(contract ,offset = 0,user_agent=DEFAUL_USER_AGENT):
     url = 'https://api.opensea.io/api/v1/assets?limit=50&asset_contract_address={}&offset={}&format=json'.format(contract.strip(),offset)
+    print('url = {}'.format(url))
     header = { 
         "User-Agent": user_agent,
     }
@@ -47,8 +48,9 @@ def getCollectionAssets(contract_address):
 
 def getCollectionSoldOrders(contract_address):
     result = []
-
+    print('start get all assets')
     collection_assets = getCollectionAssets(contract_address)
+    print('end get all assets')
     token_ids = list(pluck("token_id", collection_assets))
     np_array = np.array(token_ids)
 
