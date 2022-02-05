@@ -1,0 +1,56 @@
+version: "3"
+services:
+  listen_order:
+    build:
+      context: ./
+      dockerfile: ./ListenOrderDockerfile
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+  insert_all_data:
+    build:
+        context: ./
+        dockerfile: ./InsertAllDataDockerfile
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongodb
+      - listen_order
+    networks:
+      - mynetwork
+  update_trait:
+    build:
+      context: ./
+      dockerfile: ./UpdateTraitDockerfile
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_data:/data/db
+    networks:
+      - mynetwork
+  listen_on_list:
+    build:
+      context: ./
+      dockerfile: ./ListenOnListDockerfile
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

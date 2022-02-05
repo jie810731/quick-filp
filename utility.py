@@ -7,19 +7,37 @@ from dotenv import load_dotenv
 import os
 import datetime
 import pause
+import pymongo
+import json
+
 
 DEFAUL_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
 load_dotenv()
 
-def getAssets(contract ,offset = 0,user_agent=DEFAUL_USER_AGENT):
-    url = 'https://api.opensea.io/api/v1/assets?limit=50&asset_contract_address={}&offset={}&format=json'.format(contract.strip(),offset)
+def getAssets(contract ,offset = 0,params = {},user_agent=DEFAUL_USER_AGENT):
+    url = 'https://api.opensea.io/api/v1/assets'
     print('url = {}'.format(url))
     header = { 
         "User-Agent": user_agent,
+        "X-API-KEY": os.getenv('X-API-KEY'),
     }
+    myparams={
+        "asset_contract_address":contract,
+        "limit":50,
+        "offset":offset,
+    }
+    myparams.update(params)
+
     try:
-        res = requests.get(url=url, headers=header)
-        data = res.json()
+        status_code = ""
+        while status_code != 200:
+            res = requests.get(url=url, params=myparams,headers=header)
+            status_code = res.status_code
+            print("get assets status code = {}".format(res.status_code))
+            data = res.json()
+            if status_code != 200:
+                delay(5)
+
     except Exception as ex:
         print('get assets error message = {}'.format(ex))
 
@@ -129,8 +147,11 @@ def getCreatedOrderEvent(contract_address,occurred_after=None):
         'User-Agent': DEFAUL_USER_AGENT
     }
     try:
-        res = requests.get(url=url, headers=header)
-        data = res.json()
+        status_code = ''
+        while status_code != 200:
+            res = requests.get(url=url, headers=header)
+            status_code = res.status_code
+            data = res.json()
     except Exception as ex:
         print('get cancel order event error message = {}'.format(ex))
 
@@ -144,3 +165,73 @@ def delay(seconds=0,minutes=0,hours=0):
     until_time = now + datetime.timedelta(hours=hours,minutes=minutes,seconds=seconds)
     print("delay to = {}".format(until_time))
     pause.until(until_time)
+
+def getCollection(slug):
+    try:
+        url = 'https://api.opensea.io/api/v1/collection/{}'.format(slug)
+        print(url)
+        header = { 
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36",
+            "X-API-KEY": os.getenv('X-API-KEY'),
+        }   
+        res = requests.get(url=url, headers=header)
+        data = res.json()
+
+    except Exception as ex:
+        print('error')
+        print(ex)
+        data = []
+
+    return data
+
+def getAssetsRarityScore(asset_trait_object,collection_items_count):
+    score = 0
+    if len(asset_trait_object) <=1 :
+        return score
+    for trait in asset_trait_object:
+        if trait['trait_count'] == 0 :
+            break
+        value = 1 / (trait['trait_count']/int(collection_items_count))
+        score += value
+    
+    return score
+
+def getListingPrice(asset):
+    sell_orders = asset["sell_orders"]
+
+    if sell_orders == None :
+        return "0"
+    
+    closing_extendable = sell_orders[0]['closing_extendable']
+
+    if closing_extendable == True:
+        return "0"
+
+    current_price = float(sell_orders[0]['current_price']) /  math.pow(10,18)
+
+
+    return str(current_price)
+
+def initDB():
+    client = pymongo.MongoClient("mongodb://mongodb:27017/")
+    db = client.myCollection
+
+    return db
+
+def notify(message):
+    body = {
+        "chat_id" : -621665809,
+        "text" : message,
+        "parse_mode" : "markdown"
+    }
+
+    url = 'https://api.telegram.org/bot5004774702:AAG1s0Ay_VwrNVbGJuuLoHrZZmBXH0Yp-fo/sendMessage'
+    header = { 
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36",
+    }   
+    res = requests.get(url=url, headers=header,data=json.dumps(body))
+    data = res.json()
+
+def listenSlug():
+    return os.getenv('LISTEN_PROJECT')
