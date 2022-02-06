@@ -9,6 +9,7 @@ import datetime
 import pause
 import pymongo
 import json
+import random
 
 
 DEFAUL_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
@@ -27,16 +28,18 @@ def getAssets(contract ,offset = 0,params = {},user_agent=DEFAUL_USER_AGENT):
         "offset":offset,
     }
     myparams.update(params)
-
+    user_agent_rotator = UserAgent(limit=100)
     try:
         status_code = ""
         while status_code != 200:
+            
             res = requests.get(url=url, params=myparams,headers=header)
             status_code = res.status_code
             print("get assets status code = {}".format(res.status_code))
             data = res.json()
             if status_code != 200:
                 delay(5)
+                header['User-Agent'] = user_agent_rotator.get_random_user_agent()
 
     except Exception as ex:
         print('get assets error message = {}'.format(ex))

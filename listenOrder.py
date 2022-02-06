@@ -5,6 +5,8 @@ import math
 
 def storeEvent(event,slug,total_supply):
     asset = event['asset']
+    if not asset:
+        return
     token_id = asset['token_id']
     record_find = db[slug].find_one({ "token_id": token_id })
     if not record_find:
@@ -80,6 +82,7 @@ def storeEvent(event,slug,total_supply):
 if __name__ == '__main__':
     slug =utility.listenSlug()
     collection_detail = utility.getCollection(slug)
+    print(collection_detail)
     contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
     total_supply = int(collection_detail['collection']['stats']['total_supply'])
 
