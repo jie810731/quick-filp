@@ -156,7 +156,7 @@ def getCreatedOrderEvent(contract_address,occurred_after=None):
             status_code = res.status_code
             data = res.json()
     except Exception as ex:
-        print('get cancel order event error message = {}'.format(ex))
+        print('get creat order event error message = {}'.format(ex))
 
         data = []
         
@@ -188,7 +188,7 @@ def getCollection(slug):
     return data
 
 def getAssetsRarityScore(asset_trait_object,collection_items_count):
-    score = 0
+    score = 0.0
     if len(asset_trait_object) <=1 :
         return score
     for trait in asset_trait_object:
@@ -235,6 +235,8 @@ def notify(message):
     }   
     res = requests.get(url=url, headers=header,data=json.dumps(body))
     data = res.json()
+
+    print(data)
 
 def listenSlug():
     return os.getenv('LISTEN_PROJECT')

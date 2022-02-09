@@ -12,13 +12,12 @@ services:
       - mynetwork
   insert_all_data:
     build:
-        context: ./
-        dockerfile: ./InsertAllDataDockerfile
+      context: ./
+      dockerfile: ./InsertAllDataDockerfile
     volumes:
       - ./:/app
     depends_on:
       - mongodb
-      - listen_order
     networks:
       - mynetwork
   update_trait:
@@ -29,6 +28,7 @@ services:
       - ./:/app
     depends_on:
       - mongodb
+      - listen_order
     networks:
       - mynetwork
   mongodb:

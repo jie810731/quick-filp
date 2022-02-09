@@ -28,7 +28,7 @@ if __name__ == '__main__':
                 'traits': asset['traits'],
                 'score':score,
                 'current_price':current_price,
-                "is_notice":"0",
+                "is_notice":False,
                 "listing_time":""
             }
             if current_price != '0':

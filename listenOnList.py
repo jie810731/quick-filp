@@ -13,22 +13,34 @@ if __name__ == '__main__':
     while True:
         with_score = list(db[slug].find({ "score": { "$gt": 0 } }))
         with_score_sorted = sorted(with_score, key=lambda x: x['score'], reverse=True)
+        print('with score len = {}'.format(len(with_score_sorted)))
+        if len(with_score) < total_supply * 0.4:
+            print('not 40%')
+            utility.delay(10)
+
+            continue
         
         on_list = list(db[slug].find({'listing_time' : { "$exists": True, "$ne": '' }  }))
+        print('on the list len = {}'.format(len(on_list)))
         for item in on_list:
             token_id = item['token_id']
             index = next((i for i, item in enumerate(with_score_sorted) if item['token_id'] == token_id), -1)
 
             if index < 0:
                 continue 
-            if index < total_supply * 0.15:
-                if item['is_notice'] == "0" or item['is_notice'] > str(index/len(with_score_sorted)):
-                    message = "[link](https://opensea.io/assets/{}/{})\n{}/{}".format(contract_address,token_id,index+1,len(with_score_sorted))
-                    utility.notify(message)
-                    newvalues = { "$set": { 
-                            "is_notice": str(index/len(with_score_sorted)),
-                        }
+            
+            if index > int(len(with_score_sorted) * 0.05):
+                continue
+
+            if item['is_notice'] == False:
+    
+                message = "[link](https://opensea.io/assets/{}/{})\n token id = {} rank = {}/{}/{}  {} \n price = {}".format(contract_address,token_id,token_id,index+1,len(with_score_sorted),total_supply,(index+1)/len(with_score_sorted)*100,item['current_price'])
+                utility.notify(message)
+                newvalues = { "$set": { 
+                        "is_notice": True,
                     }
-                    db[slug].update_one({ "token_id": token_id }, newvalues)
+                }
+        
+                db[slug].update_one({ "token_id": str(token_id) }, newvalues)
             
         utility.delay(30)

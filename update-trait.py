@@ -5,7 +5,12 @@ import random
 
 def updateTraits(db,slug,contract_address,token_ids,total_supply):
     assets = utility.getAssets(contract_address,0,{"token_ids":token_ids})
-    for asset in assets['assets']:
+    try:
+        assets_data = assets['assets']
+    except KeyError:
+        assets_data = []
+
+    for asset in assets_data:
         token_id = asset['token_id']
         traits = asset['traits']
         if len(traits) <= 1:
@@ -33,11 +38,16 @@ if __name__ == '__main__':
     # print('a')
     is_need_update = True
     while is_need_update:
-        need_update_traits = list(db[slug].find({"score":"0"}))
-        # print(need_update_traits)
-        if len(need_update_traits) == 0:
+        need_update_traits = list(db[slug].find({"score":0.0}))
+        # need_update_traits = list(db[slug].find({"$or": [
+        #     {"score": "0"}, 
+        #     {"score": 0.0}
+        # ]}))
+        if len(need_update_traits) == 0 and db[slug].count_documents({}) != 0:
+            print('finish')
             is_need_update = False
-        n = 30
+
+        n = 49
         groups = [need_update_traits[k:k+n] for k in range(0, len(need_update_traits), n)]
 
         for index,group in enumerate(groups):
@@ -46,7 +56,7 @@ if __name__ == '__main__':
             threading.Thread(target = updateTraits,args = (db,slug,contract_address,token_ids,total_supply,)).start()
             # print(index)
             # print(index+1 % 10)
-            if (index+1) % 5 == 0:
+            if (index+1) % 4 == 0:
                 print('break')
                 utility.delay(10)
 
