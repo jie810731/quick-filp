@@ -17,6 +17,7 @@ services:
     volumes:
       - ./:/app
     depends_on:
+      - listen_order
       - mongodb
     networks:
       - mynetwork

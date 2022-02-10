@@ -4,36 +4,49 @@ import math
 
 if __name__ == '__main__':
     slug =utility.listenSlug()
-    collection_detail = utility.getCollection(slug)
-    collection_traits = None
-    try:
-        contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
-        collection_traits = collection_detail['collection']['traits']
-    except:
-        pass
-    
-    all_assets = utility.getCollectionAssets(contract_address)
 
+    collection_detail = utility.dataOfRetryUntilResponseOk(utility.getCollectionResponse(slug))
+    total_supply = int(collection_detail['collection']['stats']['total_supply']) 
+    
+    contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
+    
     client = pymongo.MongoClient("mongodb://mongodb:27017/")
     db = client.myCollection
 
-    for asset in all_assets:
-        score = utility.getAssetsRarityScore(asset['traits'],len(all_assets))
-        current_price = utility.getListingPrice(asset)
-        token_id = asset['token_id']
-        record_find = db[slug].find_one({ "token_id": token_id })
-        if not record_find:
-            insert_data = {
+    offset = 0
+    assets = True
+    while assets:
+        insert_datas = []
+        assets = utility.dataOfRetryUntilResponseOk(utility.getAssetsResponse(contract_address,{"offset":offset}))
+        try:
+            assets = assets['assets']
+        except:
+            assets =[]
+
+        for asset in assets:
+            token_id = asset['token_id']
+            record_find = db[slug].find_one({ "token_id": token_id })
+            if  record_find:
+
+                continue
+
+            current_price = utility.getListingPrice(asset)
+            insert = {
                 'token_id': asset['token_id'],
                 'traits': asset['traits'],
-                'score':score,
+                'score': 0.0,
                 'current_price':current_price,
                 "is_notice":False,
                 "listing_time":""
             }
             if current_price != '0':
-                insert_data['listing_time'] = asset['sell_orders'][0]['created_date']
+                insert['listing_time'] = asset['sell_orders'][0]['created_date']
 
-            db[slug].insert_one(insert_data)
+            insert_datas.append(insert)
+        if  insert_datas:
+            db[slug].insert_many(insert_datas)
+
+        offset += len(insert_datas)
+        print('insert data offset = {}'.format(offset))
         
-    print('end')
+    print('insert data end')

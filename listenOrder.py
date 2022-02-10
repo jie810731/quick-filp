@@ -47,8 +47,8 @@ def storeEvent(event,slug,total_supply):
         
 if __name__ == '__main__':
     slug =utility.listenSlug()
-    collection_detail = utility.getCollection(slug)
-    print(collection_detail)
+    collection_detail = utility.dataOfRetryUntilResponseOk(utility.getCollectionResponse(slug)) 
+    
     contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
     total_supply = int(collection_detail['collection']['stats']['total_supply'])
 
@@ -63,6 +63,8 @@ if __name__ == '__main__':
         except KeyError:
             asset_events = []
 
-        for event in events['asset_events']:
+        for event in asset_events:
             storeEvent(event,slug,total_supply)
+
+        print("store event ok")
         utility.delay(3)

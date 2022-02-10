@@ -1,11 +1,10 @@
-from ast import While
 from numpy import record
 import utility
 import math
 
 if __name__ == '__main__':
     slug =utility.listenSlug()
-    collection_detail = utility.getCollection(slug)
+    collection_detail = utility.dataOfRetryUntilResponseOk(utility.getCollectionResponse(slug)) 
     contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
     total_supply = int(collection_detail['collection']['stats']['total_supply'])
 

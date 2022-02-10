@@ -48,6 +48,25 @@ def getAssets(contract ,offset = 0,params = {},user_agent=DEFAUL_USER_AGENT):
 
     return data
 
+def getAssetsResponse(contract , params = {}):
+    url = 'https://api.opensea.io/api/v1/assets'
+    header = { 
+        "X-API-KEY": os.getenv('X-API-KEY'),
+    }
+    myparams={
+        "asset_contract_address":contract,
+        "limit":50,
+    }
+    myparams.update(params)
+    try:
+        res = requests.get(url=url, params=myparams,headers=header)
+    except Exception as ex:
+        print('get assets Response error message = {}'.format(ex))
+  
+        res = None
+
+    return res
+
 def getCollectionAssets(contract_address):
     result =[]
 
@@ -164,34 +183,30 @@ def getCreatedOrderEvent(contract_address,occurred_after=None):
 
 def delay(seconds=0,minutes=0,hours=0):
     now = datetime.datetime.now()
-    print("now is = {}".format(now))
     until_time = now + datetime.timedelta(hours=hours,minutes=minutes,seconds=seconds)
-    print("delay to = {}".format(until_time))
     pause.until(until_time)
 
-def getCollection(slug):
+def getCollectionResponse(slug):
     try:
         url = 'https://api.opensea.io/api/v1/collection/{}'.format(slug)
-        print(url)
         header = { 
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36",
             "X-API-KEY": os.getenv('X-API-KEY'),
         }   
         res = requests.get(url=url, headers=header)
-        data = res.json()
-
     except Exception as ex:
-        print('error')
-        print(ex)
-        data = []
+        print('get Collection Response error message = {}'.format(ex))
+        res = None
 
-    return data
+    return res
 
 def getAssetsRarityScore(asset_trait_object,collection_items_count):
     score = 0.0
     if len(asset_trait_object) <=1 :
         return score
     for trait in asset_trait_object:
+        if trait['trait_type'] == "Status":
+            return 0.0
+
         if trait['trait_count'] == 0 :
             break
         value = 1 / (trait['trait_count']/int(collection_items_count))
@@ -240,3 +255,14 @@ def notify(message):
 
 def listenSlug():
     return os.getenv('LISTEN_PROJECT')
+
+def dataOfRetryUntilResponseOk(request_function):
+    status_code = None
+    while status_code != 200:
+        response = request_function
+        status_code = response.status_code
+
+        if status_code == 429:
+            delay(5)
+        
+    return response.json()
