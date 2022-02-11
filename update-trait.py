@@ -51,7 +51,7 @@ if __name__ == '__main__':
     while is_need_update:
         need_update_traits = list(db[slug].find({"score":0.0}))
 
-        if len(need_update_traits) == 0 and db[slug].count_documents({}):
+        if len(need_update_traits) == 0 and db[slug].count_documents({}) != 0:
             print('update trait finish')
             is_need_update = False
         #有帶token id的話最多只能30筆 

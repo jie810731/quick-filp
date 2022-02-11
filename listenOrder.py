@@ -67,4 +67,4 @@ if __name__ == '__main__':
             storeEvent(event,slug,total_supply)
 
         print("store event ok")
-        utility.delay(3)
+        utility.delay(0.5)

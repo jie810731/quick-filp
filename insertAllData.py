@@ -46,7 +46,7 @@ if __name__ == '__main__':
         if  insert_datas:
             db[slug].insert_many(insert_datas)
 
-        offset += len(insert_datas)
+        offset += len(assets)
         print('insert data offset = {}'.format(offset))
         
     print('insert data end')

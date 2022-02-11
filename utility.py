@@ -173,6 +173,7 @@ def getCreatedOrderEvent(contract_address,occurred_after=None):
         while status_code != 200:
             res = requests.get(url=url, headers=header)
             status_code = res.status_code
+            print(status_code)
             data = res.json()
     except Exception as ex:
         print('get creat order event error message = {}'.format(ex))
