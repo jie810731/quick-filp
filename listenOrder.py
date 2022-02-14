@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
         try:
             asset_events = events['asset_events']
-        except KeyError:
+        except :
             asset_events = []
 
         for event in asset_events:
