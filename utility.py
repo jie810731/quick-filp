@@ -280,9 +280,24 @@ def getJaccardDistance(traits,diff_traits):
 
     same = list(set([x for x in both if both.count(x) > 1]))
     #['Ape', '1 attributes']
-  
+
     unique = list(set(traits_pluck + diff_traits_pluck))
     #['Ape', 'Cowboy Hat', '1 attributes', 'Fedora']
     
     return 1 - (len(same) / len(unique))
     
+def getAbi(address):
+    try:
+        url = 'https://api.etherscan.io/api'
+        myparams={
+            "module":'contract',
+            "action":'getabi',
+            "address":address,
+            "apikey":os.getenv('ETHERSCAN_API_KEY')
+        }
+        res = requests.get(url=url,params=myparams)
+    except Exception as ex:
+        print('getABI error message = {}'.format(ex))
+        res = None
+
+    return res

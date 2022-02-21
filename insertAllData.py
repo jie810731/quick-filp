@@ -33,7 +33,8 @@ if __name__ == '__main__':
             current_price = utility.getListingPrice(asset)
             insert = {
                 'token_id': asset['token_id'],
-                'traits': asset['traits'],
+                'traits': [],
+                'trait_count':0,
                 'score': 0.0,
                 'current_price':current_price,
                 "is_notice":False,
