@@ -267,3 +267,22 @@ def dataOfRetryUntilResponseOk(request_function):
             delay(5)
         
     return response.json()
+
+def getJaccardDistance(traits,diff_traits):
+    traits_pluck = [x["value"] for x in traits]
+    #['Cowboy Hat', 'Ape', '1 attributes']
+
+    diff_traits_pluck = [x["value"] for x in diff_traits]
+    #['Fedora', 'Ape', '1 attributes']
+
+    both = traits_pluck + diff_traits_pluck
+    #['Cowboy Hat', 'Ape', '1 attributes', 'Fedora', 'Ape', '1 attributes']
+
+    same = list(set([x for x in both if both.count(x) > 1]))
+    #['Ape', '1 attributes']
+  
+    unique = list(set(traits_pluck + diff_traits_pluck))
+    #['Ape', 'Cowboy Hat', '1 attributes', 'Fedora']
+    
+    return 1 - (len(same) / len(unique))
+    
