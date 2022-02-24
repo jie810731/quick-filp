@@ -1,30 +1,28 @@
 version: "3"
 services:
+  my_python:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: my_python
+    tty: true
   listen_order:
-    build:
-      context: ./
-      dockerfile: ./ListenOrderDockerfile
-    volumes:
-      - ./:/app
+    image: my_python
     depends_on:
       - mongodb
     networks:
       - mynetwork
+    command: "python3 -u listenOrder.py"
   insert_all_data:
-    build:
-      context: ./
-      dockerfile: ./InsertAllDataDockerfile
-    volumes:
-      - ./:/app
+    image: my_python
     depends_on:
       - listen_order
       - mongodb
     networks:
       - mynetwork
+    command: "python3 -u insertAllData.py"
   update_trait:
-    build:
-      context: ./
-      dockerfile: ./UpdateTraitDockerfile
+    image: my_python
     volumes:
       - ./:/app
     depends_on:
@@ -32,6 +30,71 @@ services:
       - listen_order
     networks:
       - mynetwork
+    command: "python3 -u update-trait.py"
+  calculate_jaccard_distance: &jaccard_base
+    image: my_python
+    volumes:
+      - ./:/app
+    depends_on:
+      - my_python
+      - mongodb
+    networks:
+      - mynetwork
+    command: "python3 -u calculateJaccardDistance.py"
+  calculate_jaccard_distance_1:
+    <<: *jaccard_base
+    depends_on:
+      - calculate_jaccard_distance
+      - my_python
+      - mongodb
+  calculate_jaccard_distance_2:
+    <<: *jaccard_base
+    depends_on:
+      - calculate_jaccard_distance
+      - my_python
+      - mongodb
+  calculate_jaccard_distance_3:
+    <<: *jaccard_base
+    depends_on:
+      - calculate_jaccard_distance
+      - my_python
+      - mongodb
+  calculate_jaccard_distance_4:
+    <<: *jaccard_base
+    depends_on:
+      - calculate_jaccard_distance
+      - my_python
+      - mongodb
+  # calculate_jaccard_distance_5:
+  #   <<: *jaccard_base
+  #   depends_on:
+  #     - calculate_jaccard_distance
+  #     - my_python
+  #     - mongodb
+  # calculate_jaccard_distance_6:
+  #   <<: *jaccard_base
+  #   depends_on:
+  #     - calculate_jaccard_distance
+  #     - my_python
+  #     - mongodb
+  # calculate_jaccard_distance_7:
+  #   <<: *jaccard_base
+  #   depends_on:
+  #     - calculate_jaccard_distance
+  #     - my_python
+  #     - mongodb
+  # calculate_jaccard_distance_8:
+  #   <<: *jaccard_base
+  #   depends_on:
+  #     - calculate_jaccard_distance
+  #     - my_python
+  #     - mongodb
+  # calculate_jaccard_distance_9:
+  #   <<: *jaccard_base
+  #   depends_on:
+  #     - calculate_jaccard_distance
+  #     - my_python
+  #     - mongodb
   mongodb:
     image: mongo
     restart: always
@@ -42,15 +105,23 @@ services:
     networks:
       - mynetwork
   listen_on_list:
-    build:
-      context: ./
-      dockerfile: ./ListenOnListDockerfile
+    image: my_python
     volumes:
       - ./:/app
     depends_on:
       - mongodb
     networks:
       - mynetwork
+    command: "python3 -u listenOnList.py"
+  update_score:
+    image: my_python
+    volumes:
+      - ./:/app
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+    command: "python3 -u updateScore.py"
 
 networks:
   mynetwork:

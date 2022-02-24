@@ -44,6 +44,7 @@ if __name__ == '__main__':
                 insert['listing_time'] = asset['sell_orders'][0]['created_date']
 
             insert_datas.append(insert)
+            
         if  insert_datas:
             db[slug].insert_many(insert_datas)
 

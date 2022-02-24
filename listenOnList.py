@@ -13,7 +13,7 @@ if __name__ == '__main__':
         with_score = list(db[slug].find({ "score": { "$gt": 0 } }))
         with_score_sorted = sorted(with_score, key=lambda x: x['score'], reverse=True)
         print('with score len = {}'.format(len(with_score_sorted)))
-        if len(with_score) < total_supply * 0.25:
+        if len(with_score) < total_supply * 0.95:
             print('no enough score data')
             utility.delay(10)
 

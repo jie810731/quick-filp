@@ -84,24 +84,24 @@ def updateTraitByWeb3(contract,token_id,db):
     db[slug].update_one({ "token_id": token_id }, newvalues)
     print('get trait success token id = {}'.format(token_id))
 
-def updateJaccardDistance(current,copy,db):
+def updateJaccardDistance(current,all,db):
     sum_jaccard_distance = 0
-    for calculate  in copy:
+    for calculate  in all:
         if current['token_id'] == calculate['token_id']:
             continue
         jaccard_distance = utility.getJaccardDistance(current['traits'],calculate['traits'])
 
         sum_jaccard_distance += jaccard_distance
     
-    average_jd = sum_jaccard_distance / len(copy)
+    average_jd = sum_jaccard_distance / len(all)
 
     newvalues = { "$set": { 
             "average_jaccard_distance": average_jd
         }
     }
 
-    db[slug].update_one({ "token_id": item['token_id'] }, newvalues)  
-    print("update jaccard_distance finish token id = {}".format(item['token_id']))
+    db[slug].update_one({ "token_id": current['token_id'] }, newvalues)  
+    print("update jaccard_distance finish token id = {}".format(current['token_id']))
 
 # TODO wait for insert trait to db
 # updateJaccardDistance time to long 
@@ -111,6 +111,7 @@ if __name__ == '__main__':
     slug = utility.listenSlug()
     collection_detail = utility.dataOfRetryUntilResponseOk(utility.getCollectionResponse(slug))
     contract_address = collection_detail['collection']['primary_asset_contracts'][0]['address']
+    total_supply = int(collection_detail['collection']['stats']['total_supply'])
     contract = getContract(contract_address)
     
     is_reveal = False
@@ -122,6 +123,11 @@ if __name__ == '__main__':
     
     db = utility.initDB()
     need_update_traits = list(db[slug].find({}))
+
+    while len(need_update_traits) != total_supply:
+        utility.delay(10)
+        need_update_traits = list(db[slug].find({}))
+        
     threads = []
 
     start = datetime.now()
@@ -143,48 +149,36 @@ if __name__ == '__main__':
     print("end update traits = {}".format(end_update_trait))
     print("get traits spend = {}".format(time_format))
 
-    print("start caclute jaccard distance time = {}".format(end_update_trait))
-    all = list(db[slug].find())
-    for item in all:
-        copy = all[:]
-        updateJaccardDistance(item,copy,db)
-        
-        # threading.Thread(target = updateJaccardDistance,args = (item,copy,db,)).start()
-        
-        sum_jaccard_distance = 0
-        for calculate in copy:
-            if item['token_id'] == calculate['token_id']:
-                continue
-            jaccard_distance = utility.getJaccardDistance(item['traits'],calculate['traits'])
+    # print("start caclute jaccard distance time = {}".format(end_update_trait))
+    # all = list(db[slug].find())
+    # threads = []
+    # for item in all:
+    #     # copy = all[:]
+    #     updateJaccardDistance(item,all,db)
+    #     # print("excue id = {}".format(item['token_id']))
+    #     # thread_object = threading.Thread(target = updateJaccardDistance,args = (item,all,db,))
+    #     # threads.append(thread_object)
+    #     # thread_object.start()
 
-            sum_jaccard_distance += jaccard_distance
-        
-        average_jd = sum_jaccard_distance / db[slug].count_documents({}) 
+    # # for i in threads:
+    # #     i.join()
 
-        newvalues = { "$set": { 
-                "average_jaccard_distance": average_jd
-            }
-        }
+    # end_update_distance = datetime.now()
+    # diff = (end_update_distance - end_update_trait).total_seconds()
+    # time_format = time.strftime('%H:%M:%S', time.gmtime(diff))
 
-        db[slug].update_one({ "token_id": item['token_id'] }, newvalues)  
-        print("update jaccard_distance finish token id = {}".format(item['token_id']))
-    
-    end_update_distance = datetime.now()
-    diff = (end_update_distance - end_update_trait).total_seconds()
-    time_format = time.strftime('%H:%M:%S', time.gmtime(diff))
+    # print("end update caclute jaccard distance time = {}".format(end_update_distance))
+    # print("caclute jaccard  spend = {}".format(time_format))
 
-    print("end update caclute jaccard distance time = {}".format(end_update_distance))
-    print("caclute jaccard  spend = {}".format(time_format))
-
-    max = db[slug].find_one(sort=[("average_jaccard_distance", -1)])['average_jaccard_distance']
-    min = db[slug].find_one(sort=[("average_jaccard_distance", 1)])['average_jaccard_distance']
+    # max = db[slug].find_one(sort=[("average_jaccard_distance", -1)])['average_jaccard_distance']
+    # min = db[slug].find_one(sort=[("average_jaccard_distance", 1)])['average_jaccard_distance']
    
-    for item in all:
-        score = (item['average_jaccard_distance'] - min) / (max - min) * 100
-        newvalues = { "$set": { 
-                "score": score
-            }
-        }
+    # for item in all:
+    #     score = (item['average_jaccard_distance'] - min) / (max - min) * 100
+    #     newvalues = { "$set": { 
+    #             "score": score
+    #         }
+    #     }
 
-        db[slug].update_one({ "token_id": item['token_id'] }, newvalues)
-        print("token id = {} score = {} updated".format(item['token_id'],score))
+    #     db[slug].update_one({ "token_id": item['token_id'] }, newvalues)
+    #     print("token id = {} score = {} updated".format(item['token_id'],score))

@@ -271,7 +271,7 @@ def dataOfRetryUntilResponseOk(request_function):
 def getJaccardDistance(traits,diff_traits):
     sum_object_array = traits + diff_traits
 
-    same = set([x['value'] for x in sum_object_array if sum_object_array.count(x) > 1])
+    # same = set([x['value'] for x in sum_object_array if sum_object_array.count(x) > 1])
     seen = set()
     seen_add = seen.add
     same = set(x['value'] for x in sum_object_array if x['value'] in seen or seen_add(x['value']) )
