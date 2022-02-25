@@ -8,6 +8,8 @@ services:
     tty: true
   listen_order:
     image: my_python
+    volumes:
+      - ./:/app
     depends_on:
       - mongodb
     networks:
@@ -15,6 +17,8 @@ services:
     command: "python3 -u listenOrder.py"
   insert_all_data:
     image: my_python
+    volumes:
+      - ./:/app
     depends_on:
       - listen_order
       - mongodb
@@ -119,6 +123,7 @@ services:
       - ./:/app
     depends_on:
       - mongodb
+      - insert_all_data
     networks:
       - mynetwork
     command: "python3 -u updateScore.py"

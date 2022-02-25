@@ -5,9 +5,12 @@ if __name__ == '__main__':
     db = utility.initDB()
     slug = utility.listenSlug()
 
-    while db[slug].count_documents({"average_jaccard_distance": { "$exists": False } })  != 0:
+    # db[slug].update_many({}, {"$unset": {"average_jaccard_distance":""}})
+    # quit()
+    
+    while db[slug].count_documents({"average_jaccard_distance": { "$exists": False } })  != 0 and db[slug].count_documents({}) == 0:
        utility.delay(10)
-
+    
     max = db[slug].find_one(sort=[("average_jaccard_distance", -1)])['average_jaccard_distance']
     min = db[slug].find_one(sort=[("average_jaccard_distance", 1)])['average_jaccard_distance']
     

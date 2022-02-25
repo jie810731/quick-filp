@@ -49,11 +49,10 @@ def isReveal(contract):
         print(ex)
         pass
     result = res.json()
-    
     try:
         attributes = result['attributes']
         unreveal = next((x for x in attributes if x['value'] == 'Unrevealed'), None)
-        if len(attributes) <2:
+        if len(attributes) == 0:
             return False
 
         if unreveal:

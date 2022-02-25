@@ -29,17 +29,26 @@ if __name__ == '__main__':
     collection_detail = utility.dataOfRetryUntilResponseOk(utility.getCollectionResponse(slug))
     total_supply = int(collection_detail['collection']['stats']['total_supply'])
 
-    all = list(db[slug].find())
+    while True:
+        all = list(db[slug].find({
+            "traits":{
+                "$ne":[]
+            }
+        }))
+    
+        if len(all) == total_supply:
+            break
 
-    while len(all) != total_supply:
         utility.delay(10)
-        need_update_traits = list(db[slug].find({}))
 
     while db[slug].count_documents({"average_jaccard_distance": { "$exists": False } })  != 0:
         item = db[slug].aggregate([
             { "$match": { "average_jaccard_distance": { "$exists": False } } },
             { "$sample": { "size": 1 } }
         ])
-        item =next(item) 
-
+        item =next(item,None) 
+        
+        if not item:
+            continue
+        
         updateJaccardDistance(item,all,db)
