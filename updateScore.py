@@ -8,8 +8,8 @@ if __name__ == '__main__':
     # db[slug].update_many({}, {"$unset": {"average_jaccard_distance":""}})
     # quit()
     
-    while db[slug].count_documents({"average_jaccard_distance": { "$exists": False } })  != 0 and db[slug].count_documents({}) == 0:
-       utility.delay(10)
+    while db[slug].count_documents({"average_jaccard_distance": { "$exists": False } })  != 0 or db[slug].count_documents({}) == 0:
+        utility.delay(10)
     
     max = db[slug].find_one(sort=[("average_jaccard_distance", -1)])['average_jaccard_distance']
     min = db[slug].find_one(sort=[("average_jaccard_distance", 1)])['average_jaccard_distance']

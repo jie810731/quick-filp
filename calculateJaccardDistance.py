@@ -2,14 +2,13 @@ import utility
 
 def updateJaccardDistance(current,all,db):
     sum_jaccard_distance = 0
-    for calculate  in all:
+    for indx,calculate  in enumerate(all):
         if current['token_id'] == calculate['token_id']:
             continue
         jaccard_distance = utility.getJaccardDistance(current['traits'],calculate['traits'])
 
         sum_jaccard_distance += jaccard_distance
-    
-    average_jd = sum_jaccard_distance / len(all)
+    average_jd = sum_jaccard_distance / (len(all) - 1)
 
     newvalues = { "$set": { 
             "average_jaccard_distance": average_jd
@@ -52,3 +51,6 @@ if __name__ == '__main__':
             continue
         
         updateJaccardDistance(item,all,db)
+
+    # item  = db[slug].find_one({"token_id":"4758"})
+    # updateJaccardDistance(item,all,db)
